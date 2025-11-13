@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pastel Tabata Timer</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <div class="card">
+        <header>
+          <h1>Pastel Tabata</h1>
+          <p>Set your perfect interval flow and let the clock do the rest.</p>
+          <br>
+        </header>
+
+        <section aria-label="Tabata configuration">
+          <div class="controls">
+            <div class="input-group">
+              <label for="warmup">Warm-up (seconds)</label>
+              <div class="input-row">
+                <input
+                  id="warmup"
+                  type="number"
+                  min="0"
+                  step="5"
+                  list="warmup-options"
+                  value="30"
+                />
+              </div>
+              <p class="hint">Pick a ready-made value or type your own.</p>
+              <datalist id="warmup-options">
+                <option value="0"></option>
+                <option value="30"></option>
+                <option value="45"></option>
+                <option value="60"></option>
+              </datalist>
+            </div>
+
+            <div class="input-group">
+              <label for="work">Work (seconds)</label>
+              <div class="input-row">
+                <input
+                  id="work"
+                  type="number"
+                  min="5"
+                  step="5"
+                  list="work-options"
+                  value="20"
+                />
+              </div>
+              <p class="hint">Classic 20s work, but any value works.</p>
+              <datalist id="work-options">
+                <option value="15"></option>
+                <option value="20"></option>
+                <option value="30"></option>
+                <option value="40"></option>
+              </datalist>
+            </div>
+
+            <div class="input-group">
+              <label for="rest">Rest (seconds)</label>
+              <div class="input-row">
+                <input
+                  id="rest"
+                  type="number"
+                  min="0"
+                  step="5"
+                  list="rest-options"
+                  value="10"
+                />
+              </div>
+              <p class="hint">Need longer breaks? Type anything.</p>
+              <datalist id="rest-options">
+                <option value="5"></option>
+                <option value="10"></option>
+                <option value="15"></option>
+                <option value="20"></option>
+              </datalist>
+            </div>
+
+            <div class="input-group">
+              <label for="intervals">Intervals</label>
+              <div class="input-row">
+                <input
+                  id="intervals"
+                  type="number"
+                  min="1"
+                  max="20"
+                  step="1"
+                  value="8"
+                />
+              </div>
+              <p class="hint">Rounds of work/rest after the warm-up.</p>
+            </div>
+          </div>
+        </section>
+
+        <section aria-live="polite" aria-atomic="true">
+          <div class="timer-card">
+            <div id="phaseLabel" class="phase-label">Ready</div>
+            <div id="timeDisplay" class="time-display">00:00</div>
+            <div class="progress-track" aria-hidden="true">
+              <div id="progressBar" class="progress-bar"></div>
+            </div>
+            <div class="actions">
+              <button class="btn-primary" id="startBtn">Start Session</button>
+              <button class="btn-accent" id="pauseBtn" disabled>Pause</button>
+              <button class="btn-muted" id="resetBtn" disabled>Reset</button>
+            </div>
+            <p id="statusText" class="status-text">Configure your flow and press start.</p>
+          </div>
+        </section>
+
+        <section aria-label="Upcoming phases">
+          <div class="schedule">
+            <h3>Next Up</h3>
+            <ul id="phaseList" class="phase-list"></ul>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
