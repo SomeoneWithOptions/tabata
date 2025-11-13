@@ -102,6 +102,41 @@
         margin-top: 0.35rem;
       }
 
+      .sound-btn {
+        margin-top: 1.5rem;
+        width: 100%;
+        border: 3px solid var(--ink);
+        border-radius: 1rem;
+        padding: 0.9rem 1rem;
+        font-size: 1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        cursor: pointer;
+        box-shadow: 6px 6px 0 var(--ink);
+        transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease;
+      }
+
+      .sound-btn:active {
+        transform: translate(2px, 2px);
+        box-shadow: 3px 3px 0 var(--ink);
+      }
+
+      .sound-btn:focus-visible {
+        outline: 3px dashed var(--ink);
+        outline-offset: 3px;
+      }
+
+      .sound-btn--on {
+        background: var(--accent);
+        color: var(--ink);
+      }
+
+      .sound-btn--off {
+        background: #ffd9e2;
+        color: var(--ink);
+      }
+
       .timer-card {
         background: var(--accent-3);
         border-radius: 1.25rem;

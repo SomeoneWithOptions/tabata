@@ -12,12 +12,87 @@
       const progressBar = document.getElementById('progressBar');
       const statusText = document.getElementById('statusText');
       const phaseList = document.getElementById('phaseList');
+      const soundToggleBtn = document.getElementById('soundToggleBtn');
+
+      const sound = (() => {
+        const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+        let ctx = null;
+        let enabled = true;
+
+        function ensureContext() {
+          if (!enabled || !AudioContextCtor) return null;
+          if (!ctx) {
+            ctx = new AudioContextCtor();
+          }
+          if (ctx.state === 'suspended') {
+            ctx.resume();
+          }
+          return ctx;
+        }
+
+        function playTone(frequency, duration = 0.2, volume = 0.35, type = 'sine') {
+          const audioCtx = ensureContext();
+          if (!audioCtx) return;
+          const oscillator = audioCtx.createOscillator();
+          const gainNode = audioCtx.createGain();
+          oscillator.type = type;
+          oscillator.frequency.value = frequency;
+          gainNode.gain.value = 0.0001;
+          oscillator.connect(gainNode).connect(audioCtx.destination);
+          const now = audioCtx.currentTime;
+          gainNode.gain.linearRampToValueAtTime(volume, now + 0.01);
+          gainNode.gain.linearRampToValueAtTime(0.0001, now + duration);
+          oscillator.start(now);
+          oscillator.stop(now + duration + 0.05);
+        }
+
+        return {
+          setEnabled(value) {
+            enabled = Boolean(value);
+            if (!enabled && ctx && ctx.state === 'running') {
+              ctx.suspend();
+            }
+          },
+          prime() {
+            ensureContext();
+          },
+          countdown(second) {
+            if (second < 0 || second > 2) return;
+            const freq = 520 + (2 - second) * 70;
+            playTone(freq, 0.18, 0.35, 'triangle');
+          },
+          intervalStart() {
+            playTone(780, 0.28, 0.4, 'square');
+          },
+        };
+      })();
+
+      function updateSoundButton(isOn) {
+        if (!soundToggleBtn) return;
+        soundToggleBtn.textContent = isOn ? 'Sound On' : 'Sound Off';
+        soundToggleBtn.classList.toggle('sound-btn--on', isOn);
+        soundToggleBtn.classList.toggle('sound-btn--off', !isOn);
+      }
 
       let phases = [];
       let currentPhaseIndex = 0;
       let remainingSeconds = 0;
       let timerId = null;
       let status = 'idle';
+      let soundOn = true;
+
+      sound.setEnabled(soundOn);
+      updateSoundButton(soundOn);
+      if (soundToggleBtn) {
+        soundToggleBtn.addEventListener('click', () => {
+          soundOn = !soundOn;
+          sound.setEnabled(soundOn);
+          updateSoundButton(soundOn);
+          if (soundOn) {
+            sound.prime();
+          }
+        });
+      }
 
       function toSeconds(value) {
         const parsed = Number(value);
@@ -76,6 +151,12 @@
         statusText.textContent = text;
       }
 
+      function handleCountdownAlerts() {
+        if (remainingSeconds >= 0 && remainingSeconds <= 2) {
+          sound.countdown(remainingSeconds);
+        }
+      }
+
       function updateTimerDisplay() {
         if (!phases[currentPhaseIndex]) return;
         const phase = phases[currentPhaseIndex];
@@ -103,6 +184,7 @@
           }
           remainingSeconds -= 1;
           updateTimerDisplay();
+          handleCountdownAlerts();
         }, 1000);
       }
 
@@ -113,6 +195,7 @@
         }
         currentPhaseIndex = index;
         remainingSeconds = phases[index].seconds;
+        sound.intervalStart();
         updateTimerDisplay();
         startTicking();
       }
@@ -159,6 +242,7 @@
         status = 'running';
         pauseBtn.textContent = 'Pause';
         setStatusText('Back at it!');
+        sound.prime();
         startTicking();
       }
 
@@ -180,6 +264,7 @@
       }
 
       startBtn.addEventListener('click', () => {
+        sound.prime();
         startSession();
       });
 
