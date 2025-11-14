@@ -1,19 +1,12 @@
-# tabata
+# Tabata Timer
 
-This is a simple vibe coded Tabata timer built with Codex.
-
+Minimal Tabata/HIIT interval timer written in plain HTML, CSS, and JavaScript.
 [Live Tabata Page](https://tabata.sanetomore.com/)
 
-## Features
-- Warm-up, work, and rest sliders with sensible guardrails so sessions stay on beat.
-- Visual timeline that highlights the current phase plus a color-changing progress ring.
-- Optional audio pings for countdown cues, powered by lightweight Web Audio APIs.
+## What it does
+- Collects warm-up, work, rest, and interval counts (bounded at 0–20 inputs) and builds an ordered phase schedule.
+- Streams the session on the page with a labeled timer, progress bar, and “Next Up” list that always highlights the active phase.
+- Exposes Start, Pause/Resume, and Reset controls plus optional Web Audio API cues for countdown beeps and new intervals.
 
-## Getting started
-1. Open `index.html` in a browser.
-2. Adjust the inputs to match the vibe of your session.
-3. Hit **Start** and let the Codex-powered flow guide you.
-
-## Tech stack
-- Vanilla HTML/CSS/JS; everything lives in `index.html`, `style.css`, and `script.js`.
-- No build tools or dependencies—just open the file and move.
+## Run it
+Open `index.html` directly in any modern browser—no build tools or dependencies required. Edit `style.css` for theme changes and `script.js` for logic tweaks.
