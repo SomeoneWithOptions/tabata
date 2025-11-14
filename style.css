@@ -21,7 +21,9 @@
         background: var(--bg);
         color: var(--ink);
         display: flex;
-        justify-content: center;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
         padding: 2rem clamp(1rem, 4vw, 3rem) 3rem;
       }
 
@@ -196,6 +198,31 @@
         transition: transform 0.1s ease;
       }
 
+      footer {
+        width: min(960px, 100%);
+        background: var(--card);
+        border: 3px solid var(--ink);
+        border-radius: 0.85rem;
+        box-shadow: 6px 6px 0 var(--ink);
+        padding: 0.85rem 1.25rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
+
+      footer a {
+        font-weight: 600;
+        color: var(--ink);
+        text-decoration: none;
+        text-align: center;
+      }
+
+      footer a:hover,
+      footer a:focus-visible {
+        text-decoration: underline;
+      }
+
       button:active {
         transform: translate(2px, 2px);
         box-shadow: 3px 3px 0 var(--ink);
@@ -291,4 +318,3 @@
           width: 100%;
         }
       }
-    
