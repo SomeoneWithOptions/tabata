@@ -1,6 +1,8 @@
 # tabata
 
-This is a simple vibe coded Tabata timer built with Codex. It lets you tune warm-up, work, rest, and interval durations so you can cruise through a high-energy workout soundtrack while Codex handles the countdown vibes for you.
+This is a simple vibe coded Tabata timer built with Codex.
+
+[Live Tabata Page](https://tabata.sanetomore.com/)
 
 ## Features
 - Warm-up, work, and rest sliders with sensible guardrails so sessions stay on beat.
