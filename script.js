@@ -80,6 +80,9 @@
       let timerId = null;
       let status = 'idle';
       let soundOn = true;
+      let lastWorkPhaseIndex = -1;
+      let completionCueTimers = [];
+      let completionCueScheduled = false;
 
       sound.setEnabled(soundOn);
       updateSoundButton(soundOn);
@@ -121,6 +124,38 @@
           }
         }
         return sequence;
+      }
+
+      function findLastWorkIndex(list = []) {
+        for (let i = list.length - 1; i >= 0; i -= 1) {
+          if (list[i].key === 'work') {
+            return i;
+          }
+        }
+        return -1;
+      }
+
+      function clearCompletionCueTimers() {
+        completionCueTimers.forEach((timeoutId) => clearTimeout(timeoutId));
+        completionCueTimers = [];
+      }
+
+      function resetCompletionCueState() {
+        clearCompletionCueTimers();
+        completionCueScheduled = false;
+      }
+
+      function playCompletionCue() {
+        if (completionCueScheduled || lastWorkPhaseIndex === -1) return;
+        completionCueScheduled = true;
+        clearCompletionCueTimers();
+        sound.prime();
+        for (let i = 0; i < 3; i += 1) {
+          const timeoutId = setTimeout(() => {
+            sound.intervalStart();
+          }, i * 1000);
+          completionCueTimers.push(timeoutId);
+        }
       }
 
       function formatTime(value) {
@@ -178,7 +213,11 @@
         clearTimer();
         timerId = setInterval(() => {
           if (remainingSeconds <= 0) {
+            const finishedPhase = phases[currentPhaseIndex];
             clearTimer();
+            if (finishedPhase?.key === 'work' && currentPhaseIndex === lastWorkPhaseIndex) {
+              playCompletionCue();
+            }
             beginPhase(currentPhaseIndex + 1);
             return;
           }
@@ -202,6 +241,7 @@
 
       function finishSession() {
         clearTimer();
+        playCompletionCue();
         status = 'idle';
         pauseBtn.disabled = true;
         resetBtn.disabled = false;
@@ -215,6 +255,8 @@
       function startSession() {
         const config = getConfig();
         phases = createSchedule(config);
+        lastWorkPhaseIndex = findLastWorkIndex(phases);
+        resetCompletionCueState();
         if (!phases.length) {
           setStatusText('Please set at least one active block.');
           return;
@@ -248,8 +290,10 @@
 
       function resetSession() {
         clearTimer();
+        resetCompletionCueState();
         status = 'idle';
         phases = createSchedule(getConfig());
+        lastWorkPhaseIndex = findLastWorkIndex(phases);
         currentPhaseIndex = 0;
         remainingSeconds = phases[0]?.seconds ?? 0;
         phaseLabel.textContent = 'Ready';
@@ -284,10 +328,10 @@
         input.addEventListener('input', () => {
           if (status === 'idle') {
             phases = createSchedule(getConfig());
+            lastWorkPhaseIndex = findLastWorkIndex(phases);
             updatePhaseList(phases);
           }
         });
       });
 
       resetSession();
-    
