@@ -64,6 +64,11 @@
           intervalStart() {
             playTone(780, 0.28, 0.4, 'square');
           },
+          workComplete() {
+            playTone(980, 0.15, 0.35, 'triangle');
+            setTimeout(() => playTone(980, 0.15, 0.35, 'triangle'), 200);
+            setTimeout(() => playTone(980, 0.15, 0.35, 'triangle'), 400);
+          }
         };
       })();
 
@@ -179,6 +184,12 @@
         timerId = setInterval(() => {
           if (remainingSeconds <= 0) {
             clearTimer();
+            const phase = phases[currentPhaseIndex];
+            const isWork = phase.key === 'work';
+            const isLastWork = isWork && !phases.slice(currentPhaseIndex + 1).some((p) => p.key === 'work');
+            if (isLastWork) {
+              sound.workComplete();
+            }
             beginPhase(currentPhaseIndex + 1);
             return;
           }
