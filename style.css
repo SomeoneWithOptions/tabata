@@ -254,6 +254,21 @@
         color: var(--text-muted);
       }
 
+      .time-summary {
+        margin-top: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        align-items: center;
+      }
+
+      .meta-text {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--ink);
+      }
+
       .schedule {
         background: white;
         border: 2px solid var(--ink);

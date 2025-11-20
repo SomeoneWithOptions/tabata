@@ -11,6 +11,8 @@
       const timeDisplay = document.getElementById('timeDisplay');
       const progressBar = document.getElementById('progressBar');
       const statusText = document.getElementById('statusText');
+      const totalTimeText = document.getElementById('totalTimeText');
+      const remainingTimeText = document.getElementById('remainingTimeText');
       const phaseList = document.getElementById('phaseList');
       const soundToggleBtn = document.getElementById('soundToggleBtn');
 
@@ -83,6 +85,8 @@
       let lastWorkPhaseIndex = -1;
       let completionCueTimers = [];
       let completionCueScheduled = false;
+      let totalWorkoutSeconds = 0;
+      let sessionCompleted = false;
 
       sound.setEnabled(soundOn);
       updateSoundButton(soundOn);
@@ -167,6 +171,27 @@
         return `${minutes}:${seconds}`;
       }
 
+      function calculateTotalDuration(list = []) {
+        return list.reduce((sum, phase) => sum + Math.max(0, phase.seconds || 0), 0);
+      }
+
+      function getRemainingWorkoutSeconds() {
+        if (!phases.length) return 0;
+        const upcoming = phases.slice(currentPhaseIndex + 1).reduce((sum, phase) => sum + phase.seconds, 0);
+        return remainingSeconds + upcoming;
+      }
+
+      function updateWorkoutSummaryText() {
+        if (!totalTimeText || !remainingTimeText) return;
+        totalTimeText.textContent = `Total workout: ${formatTime(totalWorkoutSeconds)}`;
+        const remaining = sessionCompleted
+          ? 0
+          : status === 'running' || status === 'paused'
+            ? getRemainingWorkoutSeconds()
+            : totalWorkoutSeconds;
+        remainingTimeText.textContent = `Time left in workout: ${formatTime(Math.max(remaining, 0))}`;
+      }
+
       function updatePhaseList(list = phases, highlightIndex = -1) {
         phaseList.innerHTML = '';
         if (!list.length) {
@@ -203,6 +228,7 @@
         const percent = phase.seconds === 0 ? 100 : ((phase.seconds - remainingSeconds) / phase.seconds) * 100;
         progressBar.style.width = `${Math.min(Math.max(percent, 0), 100)}%`;
         updatePhaseList(phases, currentPhaseIndex);
+        updateWorkoutSummaryText();
       }
 
       function clearTimer() {
@@ -246,19 +272,24 @@
         clearTimer();
         playCompletionCue();
         status = 'idle';
+        sessionCompleted = true;
         pauseBtn.disabled = true;
         resetBtn.disabled = false;
         pauseBtn.textContent = 'Pause';
         phaseLabel.textContent = 'Completed';
+        remainingSeconds = 0;
         timeDisplay.textContent = '00:00';
         progressBar.style.width = '100%';
         setStatusText('Nice! Session completed. Hit start for another round.');
+        updateWorkoutSummaryText();
       }
 
       function startSession() {
         const config = getConfig();
         phases = createSchedule(config);
+        totalWorkoutSeconds = calculateTotalDuration(phases);
         lastWorkPhaseIndex = findLastWorkIndex(phases);
+        sessionCompleted = false;
         resetCompletionCueState();
         if (!phases.length) {
           setStatusText('Please set at least one active block.');
@@ -306,8 +337,11 @@
         pauseBtn.textContent = 'Pause';
         pauseBtn.disabled = true;
         resetBtn.disabled = true;
+        sessionCompleted = false;
+        totalWorkoutSeconds = calculateTotalDuration(phases);
         setStatusText('Configure your flow and press start.');
         updatePhaseList(phases);
+        updateWorkoutSummaryText();
       }
 
       startBtn.addEventListener('click', () => {
@@ -332,7 +366,9 @@
           if (status === 'idle') {
             phases = createSchedule(getConfig());
             lastWorkPhaseIndex = findLastWorkIndex(phases);
+            totalWorkoutSeconds = calculateTotalDuration(phases);
             updatePhaseList(phases);
+            updateWorkoutSummaryText();
           }
         });
       });
