@@ -116,11 +116,14 @@
         if (config.warmup > 0) {
           sequence.push({ key: 'warmup', label: 'Warm-up', seconds: config.warmup });
         }
-        for (let i = 1; i <= config.intervals; i += 1) {
-          sequence.push({ key: 'work', label: `Work #${i}`, seconds: config.work });
-          const needsRest = i !== config.intervals && config.rest > 0;
-          if (needsRest) {
-            sequence.push({ key: 'rest', label: 'Rest', seconds: config.rest });
+        const totalIntervals = config.intervals;
+        const totalRests = Math.max(0, totalIntervals - 1);
+        let restCount = 1;
+        for (let i = 1; i <= totalIntervals; i += 1) {
+          sequence.push({ key: 'work', label: `Work ${i}/${totalIntervals}`, seconds: config.work });
+          if (i < totalIntervals && config.rest > 0) {
+            sequence.push({ key: 'rest', label: `Rest ${restCount}/${totalRests}`, seconds: config.rest });
+            restCount++;
           }
         }
         return sequence;
