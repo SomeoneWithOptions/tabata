@@ -86,6 +86,7 @@ let completionCueTimers = [];
 let completionCueScheduled = false;
 let totalWorkoutSeconds = 0;
 let sessionCompleted = false;
+let wakeLock = null;
 
 sound.setEnabled(soundOn);
 updateSoundButton(soundOn);
@@ -276,6 +277,7 @@ function finishSession() {
     remainingSeconds = 0;
     timeDisplay.textContent = '00:00';
     progressBar.style.width = '100%';
+    releaseWakeLock();
     updateWorkoutSummaryText();
 }
 
@@ -295,6 +297,7 @@ function startSession() {
     pauseBtn.textContent = 'Pause';
     startBtn.textContent = 'Restart Session';
     updatePhaseList(phases, 0);
+    requestWakeLock();
     beginPhase(0);
 }
 
@@ -302,6 +305,7 @@ function pauseSession() {
     if (status !== 'running') return;
     status = 'paused';
     clearTimer();
+    releaseWakeLock();
     pauseBtn.textContent = 'Resume';
 }
 
@@ -310,6 +314,7 @@ function resumeSession() {
     status = 'running';
     pauseBtn.textContent = 'Pause';
     sound.prime();
+    requestWakeLock();
     startTicking();
 }
 
@@ -329,6 +334,7 @@ function resetSession() {
     pauseBtn.disabled = true;
     resetBtn.disabled = true;
     sessionCompleted = false;
+    releaseWakeLock();
     totalWorkoutSeconds = calculateTotalDuration(phases);
     updatePhaseList(phases);
     updateWorkoutSummaryText();
@@ -363,4 +369,58 @@ Object.values(fields).forEach((input) => {
     });
 });
 
+function requestWakeLock() {
+    try {
+        if ('wakeLock' in navigator) {
+            navigator.wakeLock.request('screen')
+                .then((lock) => {
+                    wakeLock = lock;
+                    console.log('Screen wake lock acquired');
+                })
+                .catch((err) => {
+                    console.warn('Failed to acquire wake lock:', err);
+                });
+        }
+    } catch (err) {
+        console.warn('Wake Lock API not supported:', err);
+    }
+}
+
+function releaseWakeLock() {
+    if (wakeLock) {
+        wakeLock.release()
+            .then(() => {
+                wakeLock = null;
+                console.log('Screen wake lock released');
+            })
+            .catch((err) => {
+                console.warn('Failed to release wake lock:', err);
+            });
+    }
+}
+
+function handleVisibilityChange() {
+    if (document.visibilityState === 'visible') {
+        if (status === 'running' && !wakeLock) {
+            requestWakeLock();
+        }
+    }
+}
+
+function setupWakeLockListeners() {
+    if ('wakeLock' in navigator) {
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+    }
+}
+
+function cleanupWakeLock() {
+    releaseWakeLock();
+    if ('wakeLock' in navigator) {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }
+}
+
 resetSession();
+setupWakeLockListeners();
+
+window.addEventListener('beforeunload', cleanupWakeLock);
