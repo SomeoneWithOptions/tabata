@@ -87,6 +87,8 @@ let completionCueScheduled = false;
 let totalWorkoutSeconds = 0;
 let sessionCompleted = false;
 let wakeLock = null;
+let completedWorkSegments = 0;
+let completedRestSegments = 0;
 
 sound.setEnabled(soundOn);
 updateSoundButton(soundOn);
@@ -109,7 +111,7 @@ function toSeconds(value) {
 function getConfig() {
     return {
         warmup: toSeconds(fields.warmup.value),
-        work: Math.max(5, toSeconds(fields.work.value)),
+        work: Math.max(1, toSeconds(fields.work.value)),
         rest: toSeconds(fields.rest.value),
         intervals: Math.max(1, Math.min(20, toSeconds(fields.intervals.value))),
     };
@@ -220,7 +222,24 @@ function handleCountdownAlerts() {
 function updateTimerDisplay() {
     if (!phases[currentPhaseIndex]) return;
     const phase = phases[currentPhaseIndex];
-    phaseLabel.textContent = phase.label;
+
+    // Use the tracked completed segments for display
+    let completedWork = completedWorkSegments;
+    let completedRest = completedRestSegments;
+
+    // Note: completedSegments are incremented when a segment finishes.
+    // So during a segment, the display should show the previous count.
+    // Since we want to show "Work 1/X" when starting the 1st work, and it goes to "Work 1/X" when finishing it (and next starts),
+    // let's verify the logic:
+    // startSession -> beginPhase(0) -> Work 1 starts.
+    // completedWorkSegments is 0.
+    // We want "Work 0/X - Rest 0/Y" or "Work 1/X - Rest 0/Y"?
+    // Requirement says: "Counters start at 'Work 0/X - Rest 0/Y' when workout begins"
+    // Requirement says: "Work counter increments when a work segment completes"
+    // So "Work 1" starts at 0. It becomes "Work 1" when it finishes.
+    // This matches the current logic of completedWorkSegments.
+
+    phaseLabel.textContent = `Work ${completedWork}/${phase.key === 'work' ? phase.label.match(/\/(\d+)/)[1] : phases.filter(p => p.key === 'work').length} - Rest ${completedRest}/${phases.filter(p => p.key === 'rest').length}`;
     timeDisplay.textContent = formatTime(remainingSeconds);
     const percent = phase.seconds === 0 ? 100 : ((phase.seconds - remainingSeconds) / phase.seconds) * 100;
     progressBar.style.width = `${Math.min(Math.max(percent, 0), 100)}%`;
@@ -241,6 +260,11 @@ function startTicking() {
         if (remainingSeconds <= 0) {
             const finishedPhase = phases[currentPhaseIndex];
             clearTimer();
+            if (finishedPhase?.key === 'work') {
+                completedWorkSegments++;
+            } else if (finishedPhase?.key === 'rest') {
+                completedRestSegments++;
+            }
             if (finishedPhase?.key === 'work' && currentPhaseIndex === lastWorkPhaseIndex) {
                 playCompletionCue();
             }
@@ -326,6 +350,8 @@ function resetSession() {
     lastWorkPhaseIndex = findLastWorkIndex(phases);
     currentPhaseIndex = 0;
     remainingSeconds = phases[0]?.seconds ?? 0;
+    completedWorkSegments = 0;
+    completedRestSegments = 0;
     phaseLabel.textContent = 'Ready';
     timeDisplay.textContent = '00:00';
     progressBar.style.width = '0%';
