@@ -8,6 +8,9 @@ const startBtn = document.getElementById('startBtn');
 const pauseBtn = document.getElementById('pauseBtn');
 const resetBtn = document.getElementById('resetBtn');
 const phaseLabel = document.getElementById('phaseLabel');
+const workPhase = document.getElementById('workPhase');
+const restPhase = document.getElementById('restPhase');
+const phaseSeparator = document.getElementById('phaseSeparator');
 const timeDisplay = document.getElementById('timeDisplay');
 const progressBar = document.getElementById('progressBar');
 const totalTimeText = document.getElementById('totalTimeText');
@@ -239,7 +242,15 @@ function updateTimerDisplay() {
     // So "Work 1" starts at 0. It becomes "Work 1" when it finishes.
     // This matches the current logic of completedWorkSegments.
 
-    phaseLabel.textContent = `Work ${completedWork}/${phase.key === 'work' ? phase.label.match(/\/(\d+)/)[1] : phases.filter(p => p.key === 'work').length} - Rest ${completedRest}/${phases.filter(p => p.key === 'rest').length}`;
+    const totalWork = phases.filter(p => p.key === 'work').length;
+    const totalRest = phases.filter(p => p.key === 'rest').length;
+
+    workPhase.textContent = `Work ${completedWork}/${totalWork}`;
+    phaseSeparator.textContent = ' - ';
+    restPhase.textContent = `Rest ${completedRest}/${totalRest}`;
+
+    workPhase.classList.toggle('active', phase.key === 'work' || phase.key === 'warmup');
+    restPhase.classList.toggle('active', phase.key === 'rest');
     timeDisplay.textContent = formatTime(remainingSeconds);
     const percent = phase.seconds === 0 ? 100 : ((phase.seconds - remainingSeconds) / phase.seconds) * 100;
     progressBar.style.width = `${Math.min(Math.max(percent, 0), 100)}%`;
@@ -297,7 +308,11 @@ function finishSession() {
     pauseBtn.disabled = true;
     resetBtn.disabled = false;
     pauseBtn.textContent = 'Pause';
-    phaseLabel.textContent = 'Completed';
+    workPhase.textContent = 'Completed';
+    phaseSeparator.textContent = '';
+    restPhase.textContent = '';
+    workPhase.classList.remove('active');
+    restPhase.classList.remove('active');
     remainingSeconds = 0;
     timeDisplay.textContent = '00:00';
     progressBar.style.width = '100%';
@@ -352,7 +367,11 @@ function resetSession() {
     remainingSeconds = phases[0]?.seconds ?? 0;
     completedWorkSegments = 0;
     completedRestSegments = 0;
-    phaseLabel.textContent = 'Ready';
+    workPhase.textContent = 'Ready';
+    phaseSeparator.textContent = '';
+    restPhase.textContent = '';
+    workPhase.classList.remove('active');
+    restPhase.classList.remove('active');
     timeDisplay.textContent = '00:00';
     progressBar.style.width = '0%';
     startBtn.textContent = 'Start Session';

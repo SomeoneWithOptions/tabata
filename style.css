@@ -159,6 +159,10 @@
           color: var(--text-muted);
       }
 
+      .phase-label span.active {
+          color: var(--ink);
+      }
+
       .time-display {
           font-size: clamp(3rem, 16vw, 5.5rem);
           margin: 0.5rem 0 1rem;
@@ -250,7 +254,7 @@
       }
 
       .time-summary {
-          margin-top: 0.75rem;
+          margin-top: 1.5rem;
           display: flex;
           flex-direction: column;
           gap: 0.35rem;

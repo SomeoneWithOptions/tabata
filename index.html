@@ -101,7 +101,11 @@
 
         <section aria-live="polite" aria-atomic="true">
           <div class="timer-card">
-            <div id="phaseLabel" class="phase-label">Ready</div>
+            <div id="phaseLabel" class="phase-label">
+              <span id="workPhase">Ready</span>
+              <span id="phaseSeparator"></span>
+              <span id="restPhase"></span>
+            </div>
             <div id="timeDisplay" class="time-display">00:00</div>
             <div class="progress-track" aria-hidden="true">
               <div id="progressBar" class="progress-bar"></div>
