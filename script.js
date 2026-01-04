@@ -245,9 +245,16 @@ function updateTimerDisplay() {
     const totalWork = phases.filter(p => p.key === 'work').length;
     const totalRest = phases.filter(p => p.key === 'rest').length;
 
-    workPhase.textContent = `Work ${completedWork}/${totalWork}`;
-    phaseSeparator.textContent = ' - ';
-    restPhase.textContent = `Rest ${completedRest}/${totalRest}`;
+    // Display "Warm Up" during warm-up phase, otherwise show work/rest counters
+    if (phase.key === 'warmup') {
+        workPhase.textContent = 'Warm Up';
+        phaseSeparator.textContent = '';
+        restPhase.textContent = '';
+    } else {
+        workPhase.textContent = `Work ${completedWork}/${totalWork}`;
+        phaseSeparator.textContent = ' - ';
+        restPhase.textContent = `Rest ${completedRest}/${totalRest}`;
+    }
 
     workPhase.classList.toggle('active', phase.key === 'work' || phase.key === 'warmup');
     restPhase.classList.toggle('active', phase.key === 'rest');
