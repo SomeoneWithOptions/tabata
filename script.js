@@ -327,6 +327,8 @@ function startSession() {
     lastWorkPhaseIndex = findLastWorkIndex(phases);
     sessionCompleted = false;
     resetCompletionCueState();
+    completedWorkSegments = 0;
+    completedRestSegments = 0;
     if (!phases.length) {
         return;
     }
