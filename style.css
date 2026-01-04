@@ -159,8 +159,18 @@
           color: var(--text-muted);
       }
 
+      .phase-label span {
+          font-size: 0.85rem;
+          font-weight: 400;
+          opacity: 0.5;
+      }
+
       .phase-label span.active {
           color: var(--ink);
+          font-size: 1.25rem;
+          font-weight: 800;
+          opacity: 1;
+          text-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
       }
 
       .time-display {
