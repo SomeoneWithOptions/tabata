@@ -226,21 +226,17 @@ function updateTimerDisplay() {
     if (!phases[currentPhaseIndex]) return;
     const phase = phases[currentPhaseIndex];
 
-    // Use the tracked completed segments for display
-    let completedWork = completedWorkSegments;
-    let completedRest = completedRestSegments;
-
-    // Note: completedSegments are incremented when a segment finishes.
-    // So during a segment, the display should show the previous count.
-    // Since we want to show "Work 1/X" when starting the 1st work, and it goes to "Work 1/X" when finishing it (and next starts),
-    // let's verify the logic:
-    // startSession -> beginPhase(0) -> Work 1 starts.
-    // completedWorkSegments is 0.
-    // We want "Work 0/X - Rest 0/Y" or "Work 1/X - Rest 0/Y"?
-    // Requirement says: "Counters start at 'Work 0/X - Rest 0/Y' when workout begins"
-    // Requirement says: "Work counter increments when a work segment completes"
-    // So "Work 1" starts at 0. It becomes "Work 1" when it finishes.
-    // This matches the current logic of completedWorkSegments.
+    // Calculate current work and rest interval numbers (1-based)
+    // Count how many work/rest phases exist up to and including the current phase
+    let currentWorkNumber = 0;
+    let currentRestNumber = 0;
+    for (let i = 0; i <= currentPhaseIndex; i++) {
+        if (phases[i].key === 'work') {
+            currentWorkNumber++;
+        } else if (phases[i].key === 'rest') {
+            currentRestNumber++;
+        }
+    }
 
     const totalWork = phases.filter(p => p.key === 'work').length;
     const totalRest = phases.filter(p => p.key === 'rest').length;
@@ -251,9 +247,9 @@ function updateTimerDisplay() {
         phaseSeparator.textContent = '';
         restPhase.textContent = '';
     } else {
-        workPhase.textContent = `Work ${completedWork}/${totalWork}`;
+        workPhase.textContent = `Work ${currentWorkNumber}/${totalWork}`;
         phaseSeparator.textContent = ' - ';
-        restPhase.textContent = `Rest ${completedRest}/${totalRest}`;
+        restPhase.textContent = `Rest ${currentRestNumber}/${totalRest}`;
     }
 
     workPhase.classList.toggle('active', phase.key === 'work' || phase.key === 'warmup');
