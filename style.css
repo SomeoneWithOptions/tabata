@@ -5,6 +5,8 @@
           --accent: #a0c4ff;
           --accent-2: #ffafcc;
           --accent-3: #caffbf;
+          --accent-4: #ffd6a5;
+          --accent-5: #bcf4de;
           --ink: #1f1f1f;
           --text-muted: #545454;
           font-family: 'Space Grotesk', 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
@@ -137,9 +139,17 @@
           color: var(--ink);
       }
 
+      .sound-btn--on:hover:not(:disabled) {
+          background: #8ab6ff;
+      }
+
       .sound-btn--off {
           background: #ffd9e2;
           color: var(--ink);
+      }
+
+      .sound-btn--off:hover:not(:disabled) {
+          background: #ffbfcd;
       }
 
       .timer-card {
@@ -255,20 +265,32 @@
           background: var(--accent);
       }
 
+      .btn-primary:hover:not(:disabled) {
+          background: #8ab6ff;
+      }
+
       .btn-accent {
           background: var(--accent-2);
+      }
+
+      .btn-accent:hover:not(:disabled) {
+          background: #ff94b8;
       }
 
       .btn-muted {
           background: #ffeedd;
       }
 
+      .btn-muted:hover:not(:disabled) {
+          background: #ffdec2;
+      }
+
       .nav-actions {
           display: none;
-          gap: 0.75rem;
+          gap: 1rem;
           justify-content: center;
           flex-wrap: wrap;
-          margin-top: 0.75rem;
+          margin-top: 1.5rem;
       }
 
       .nav-actions.visible {
@@ -276,13 +298,24 @@
       }
 
       .btn-nav {
-          background: #e8dff5;
-          font-size: 0.9rem;
-          padding: 0.65rem 1.4rem;
+          font-size: 1rem;
+          padding: 0.85rem 1.8rem;
       }
 
-      .btn-nav:hover:not(:disabled) {
-          background: #d4c4ed;
+      .btn-prev {
+          background: var(--accent-4);
+      }
+
+      .btn-prev:hover:not(:disabled) {
+          background: #ffc27a;
+      }
+
+      .btn-next {
+          background: var(--accent-5);
+      }
+
+      .btn-next:hover:not(:disabled) {
+          background: #99ecc9;
       }
 
       .time-summary {

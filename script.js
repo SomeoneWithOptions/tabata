@@ -23,6 +23,7 @@ const soundToggleBtn = document.getElementById('soundToggleBtn');
 const navActions = document.getElementById('navActions');
 const prevBtn = document.getElementById('prevBtn');
 const skipBtn = document.getElementById('skipBtn');
+const MAX_VISIBLE_PHASES = 5;
 
 const sound = (() => {
     const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
@@ -244,20 +245,60 @@ function updateWorkoutSummaryText() {
     remainingTimeText.textContent = `Time left in workout: ${formatTime(Math.max(remaining, 0))}`;
 }
 
-function updatePhaseList(list = phases, highlightIndex = -1) {
+function isSessionActive() {
+    return status === 'running' || status === 'paused';
+}
+
+function renderPhaseListMessage(title, description) {
     phaseList.innerHTML = '';
+    const li = document.createElement('li');
+    li.className = 'phase-item phase-item--empty';
+
+    const strong = document.createElement('strong');
+    strong.textContent = title;
+
+    const span = document.createElement('span');
+    span.textContent = description;
+
+    li.append(strong, span);
+    phaseList.appendChild(li);
+}
+
+function updatePhaseList(list = phases, highlightIndex = -1) {
     if (!list.length) {
-        phaseList.innerHTML = '<li class="phase-item"><strong>Waiting</strong><span>Press start to build the flow.</span></li>';
+        if (sessionCompleted) {
+            renderPhaseListMessage('Workout complete', 'Reset or start again.');
+        } else {
+            renderPhaseListMessage('Waiting', 'Press start to build the flow.');
+        }
         return;
     }
 
-    list.forEach((phase, idx) => {
+    phaseList.innerHTML = '';
+
+    const activeIndex = isSessionActive() && highlightIndex >= 0 && highlightIndex < list.length
+        ? highlightIndex
+        : -1;
+    const startIndex = activeIndex === -1 ? 0 : activeIndex;
+    const visiblePhases = list.slice(startIndex, startIndex + MAX_VISIBLE_PHASES);
+
+    visiblePhases.forEach((phase, idx) => {
+        const phaseIndex = startIndex + idx;
+        const isActivePhase = phaseIndex === activeIndex;
         const li = document.createElement('li');
         li.className = 'phase-item';
-        li.innerHTML = `<strong>${phase.label}</strong><span>${phase.seconds} s</span>`;
-        if (idx === highlightIndex) {
-            li.style.background = 'var(--accent-3)';
+        if (isActivePhase) {
+            li.classList.add('is-active');
+            li.setAttribute('aria-current', 'step');
         }
+
+        const strong = document.createElement('strong');
+        strong.textContent = phase.label;
+
+        const span = document.createElement('span');
+        span.textContent = `${phase.seconds} s`;
+
+        li.append(strong, span);
         phaseList.appendChild(li);
     });
 }
@@ -377,6 +418,7 @@ function finishSession() {
     releaseWakeLock();
     updateNavButtons();
     updateWorkoutSummaryText();
+    updatePhaseList([]);
 }
 
 function startSession() {
