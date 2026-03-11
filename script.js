@@ -1,3 +1,6 @@
+const STORAGE_KEY = 'tabata-settings';
+const DEFAULTS = { warmup: 30, work: 20, rest: 10, intervals: 8, soundOn: true };
+
 const fields = {
     warmup: document.getElementById('warmup'),
     work: document.getElementById('work'),
@@ -103,6 +106,7 @@ if (soundToggleBtn) {
         soundOn = !soundOn;
         sound.setEnabled(soundOn);
         updateSoundButton(soundOn);
+        saveSettings();
         if (soundOn) {
             sound.prime();
         }
@@ -112,6 +116,46 @@ if (soundToggleBtn) {
 function toSeconds(value) {
     const parsed = Number(value);
     return Number.isFinite(parsed) && parsed >= 0 ? Math.floor(parsed) : 0;
+}
+
+function isValidNumber(val, min = 0, max = Infinity) {
+    return typeof val === 'number' && Number.isFinite(val) && val >= min && val <= max;
+}
+
+function saveSettings() {
+    const settings = {
+        warmup: toSeconds(fields.warmup.value),
+        work: toSeconds(fields.work.value),
+        rest: toSeconds(fields.rest.value),
+        intervals: toSeconds(fields.intervals.value),
+        soundOn: soundOn,
+    };
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    } catch (e) {
+        // localStorage might be full or disabled — silently ignore
+    }
+}
+
+function loadSettings() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+
+        fields.warmup.value = isValidNumber(saved.warmup, 0) ? saved.warmup : DEFAULTS.warmup;
+        fields.work.value = isValidNumber(saved.work, 1) ? saved.work : DEFAULTS.work;
+        fields.rest.value = isValidNumber(saved.rest, 0) ? saved.rest : DEFAULTS.rest;
+        fields.intervals.value = isValidNumber(saved.intervals, 1, 20) ? saved.intervals : DEFAULTS.intervals;
+
+        if (typeof saved.soundOn === 'boolean') {
+            soundOn = saved.soundOn;
+            sound.setEnabled(soundOn);
+            updateSoundButton(soundOn);
+        }
+    } catch (e) {
+        // Corrupted data — ignore, use HTML defaults
+    }
 }
 
 function getConfig() {
@@ -467,6 +511,7 @@ Object.values(fields).forEach((input) => {
             updatePhaseList(phases);
             updateWorkoutSummaryText();
         }
+        saveSettings();
     });
 });
 
@@ -521,6 +566,7 @@ function cleanupWakeLock() {
     }
 }
 
+loadSettings();
 resetSession();
 setupWakeLockListeners();
 
