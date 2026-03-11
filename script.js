@@ -17,6 +17,9 @@ const totalTimeText = document.getElementById('totalTimeText');
 const remainingTimeText = document.getElementById('remainingTimeText');
 const phaseList = document.getElementById('phaseList');
 const soundToggleBtn = document.getElementById('soundToggleBtn');
+const navActions = document.getElementById('navActions');
+const prevBtn = document.getElementById('prevBtn');
+const skipBtn = document.getElementById('skipBtn');
 
 const sound = (() => {
     const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
@@ -291,6 +294,13 @@ function startTicking() {
     }, 1000);
 }
 
+function updateNavButtons() {
+    const active = status === 'running' || status === 'paused';
+    navActions.classList.toggle('visible', active);
+    prevBtn.disabled = !active || currentPhaseIndex === 0;
+    skipBtn.disabled = !active || currentPhaseIndex >= phases.length - 1;
+}
+
 function beginPhase(index) {
     if (index >= phases.length) {
         finishSession();
@@ -300,6 +310,7 @@ function beginPhase(index) {
     remainingSeconds = phases[index].seconds;
     sound.intervalStart();
     updateTimerDisplay();
+    updateNavButtons();
     startTicking();
 }
 
@@ -320,6 +331,7 @@ function finishSession() {
     timeDisplay.textContent = '00:00';
     progressBar.style.width = '100%';
     releaseWakeLock();
+    updateNavButtons();
     updateWorkoutSummaryText();
 }
 
@@ -387,7 +399,38 @@ function resetSession() {
     releaseWakeLock();
     totalWorkoutSeconds = calculateTotalDuration(phases);
     updatePhaseList(phases);
+    updateNavButtons();
     updateWorkoutSummaryText();
+}
+
+function navigatePhase(targetIndex) {
+    if (targetIndex < 0 || targetIndex >= phases.length) return;
+
+    const skippedPhase = phases[currentPhaseIndex];
+    clearTimer();
+
+    if (targetIndex > currentPhaseIndex && skippedPhase) {
+        if (skippedPhase.key === 'work') completedWorkSegments++;
+        else if (skippedPhase.key === 'rest') completedRestSegments++;
+    }
+
+    if (targetIndex < currentPhaseIndex) {
+        const prevPhase = phases[targetIndex];
+        if (prevPhase) {
+            if (prevPhase.key === 'work' && completedWorkSegments > 0) completedWorkSegments--;
+            else if (prevPhase.key === 'rest' && completedRestSegments > 0) completedRestSegments--;
+        }
+    }
+
+    currentPhaseIndex = targetIndex;
+    remainingSeconds = phases[targetIndex].seconds;
+    sound.intervalStart();
+    updateTimerDisplay();
+    updateNavButtons();
+
+    if (status === 'running') {
+        startTicking();
+    }
 }
 
 startBtn.addEventListener('click', () => {
@@ -405,6 +448,14 @@ pauseBtn.addEventListener('click', () => {
 
 resetBtn.addEventListener('click', () => {
     resetSession();
+});
+
+prevBtn.addEventListener('click', () => {
+    navigatePhase(currentPhaseIndex - 1);
+});
+
+skipBtn.addEventListener('click', () => {
+    navigatePhase(currentPhaseIndex + 1);
 });
 
 Object.values(fields).forEach((input) => {

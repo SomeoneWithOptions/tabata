@@ -263,6 +263,28 @@
           background: #ffeedd;
       }
 
+      .nav-actions {
+          display: none;
+          gap: 0.75rem;
+          justify-content: center;
+          flex-wrap: wrap;
+          margin-top: 0.75rem;
+      }
+
+      .nav-actions.visible {
+          display: flex;
+      }
+
+      .btn-nav {
+          background: #e8dff5;
+          font-size: 0.9rem;
+          padding: 0.65rem 1.4rem;
+      }
+
+      .btn-nav:hover:not(:disabled) {
+          background: #d4c4ed;
+      }
+
       .time-summary {
           margin-top: 1.5rem;
           display: flex;
@@ -334,7 +356,8 @@
               padding: 1.5rem 1rem;
           }
 
-          .actions {
+          .actions,
+          .nav-actions {
               flex-direction: column;
           }
 
